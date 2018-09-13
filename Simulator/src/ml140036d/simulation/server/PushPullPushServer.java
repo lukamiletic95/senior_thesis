@@ -60,6 +60,7 @@ public class PushPullPushServer extends Server {
 
                 requested.add(transaction.getId());
 
+                transaction.setHopCount(transaction.getHopCount() + 1);
                 mempool.add(transaction);
 
                 toProposeMutex.acquireUninterruptibly();

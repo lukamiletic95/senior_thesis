@@ -145,4 +145,14 @@ public abstract class Server {
         passiveThreadFinished = true;
         requestsEmpty.release();
     }
+
+    public boolean peerSubsetContains(Server server) {
+        for (Link peer : peerSubset) {
+            if (peer.getPeer().equals(server)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

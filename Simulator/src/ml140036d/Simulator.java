@@ -6,6 +6,7 @@ import ml140036d.simulation.server.Link;
 import ml140036d.simulation.server.PushPullPushServer;
 import ml140036d.simulation.server.Server;
 import ml140036d.util.Constants;
+import ml140036d.util.SafePrint;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -16,8 +17,11 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,7 +41,9 @@ public class Simulator {
             maximumPeerSubsetSize = 1;
         }
 
+        System.out.println("Inicijalizacija");
         ArrayList<Server> servers = initServers(numberOfServers, simulationStrategy, toSignal, maximumPeerSubsetSize);
+        System.out.println("Gotova!");
 
         sendTransactions(servers, numberOfTransactions);
 
@@ -80,15 +86,19 @@ public class Simulator {
 
             servers.add(server);
         }
-
+        
         for (Server server : servers) { // dalje se formira podskup suseda za sve servere, tako da nikad ne premasi vrednost [ln(n), 2ln(n), 3ln(n)]
-            int peerSubsetSize = ThreadLocalRandom.current().nextInt(1, maximumPeerSubsetSize + 1) - server.getPeerSubset().size();
+            int peerSubsetSize = maximumPeerSubsetSize - server.getPeerSubset().size();
+
+            if (peerSubsetSize <= 0) {
+                continue;
+            }
 
             for (int i = 0; i < peerSubsetSize; i++) {
                 int peerIndex = ThreadLocalRandom.current().nextInt(0, servers.size());
                 Server peer = servers.get(peerIndex);
 
-                if (server.equals(peer) || server.getPeerSubset().contains(peer) || peer.getPeerSubset().size() == maximumPeerSubsetSize) {
+                if (server.equals(peer) || server.peerSubsetContains(peer) || peer.getPeerSubset().size() == maximumPeerSubsetSize) {
                     i--;
                     continue;
                 }
@@ -315,6 +325,8 @@ public class Simulator {
         XYPlot plot = chart.getXYPlot();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 
+        renderer.setLegendLine(new Line2D.Double(-50.0D, 0.0D, 50.0D, 0.0D));
+
         renderer.setSeriesPaint(0, Color.BLUE);
         renderer.setSeriesPaint(1, Color.GREEN);
 
@@ -327,6 +339,18 @@ public class Simulator {
         plot.setRenderer(renderer);
 
         plot.setBackgroundPaint(Color.WHITE);
+
+        Font labelFont = new Font("AxisLabelFont", Font.BOLD, 30);
+        plot.getDomainAxis().setLabelFont(labelFont);
+        plot.getRangeAxis().setLabelFont(labelFont);
+
+        Font axisValuesFont = new Font("AxisValuesFont", Font.PLAIN, 25);
+        plot.getDomainAxis().setTickLabelFont(axisValuesFont);
+        plot.getRangeAxis().setTickLabelFont(axisValuesFont);
+
+        Font legendTitleFont = new Font("AxisLabelFont", Font.BOLD, 30);
+        chart.getLegend().setItemFont(legendTitleFont);
+        chart.getTitle().setFont(legendTitleFont);
     }
 
 }
