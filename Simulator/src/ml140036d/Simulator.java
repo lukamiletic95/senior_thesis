@@ -40,10 +40,8 @@ public class Simulator {
         if (maximumPeerSubsetSize <= 0) {
             maximumPeerSubsetSize = 1;
         }
-
-        System.out.println("Inicijalizacija");
+        
         ArrayList<Server> servers = initServers(numberOfServers, simulationStrategy, toSignal, maximumPeerSubsetSize);
-        System.out.println("Gotova!");
 
         sendTransactions(servers, numberOfTransactions);
 
@@ -59,7 +57,7 @@ public class Simulator {
     }
 
     // funkcija inicijalizuje servere i formira podskup suseda za svaki server
-    private ArrayList<Server> initServers(int numberOfServers, SimulationStrategy simulationStrategy, Semaphore toSignal, int maximumPeerSubsetSize) {
+    private ArrayList<Server> initServers(int numberOfServers, SimulationStrategy simulationStrategy, Semaphore toSignal, int averagePeerSubsetSize) {
         ArrayList<Server> servers = new ArrayList<>(numberOfServers);
 
         for (int i = 0; i < numberOfServers; i++) {
@@ -71,7 +69,7 @@ public class Simulator {
                     int peerIndex = ThreadLocalRandom.current().nextInt(0, servers.size());
                     Server peer = servers.get(peerIndex);
 
-                    if (peer.getPeerSubset().size() == maximumPeerSubsetSize) {
+                    if (peer.getPeerSubset().size() == 2 * averagePeerSubsetSize) {
                         continue;
                     }
 
@@ -86,9 +84,10 @@ public class Simulator {
 
             servers.add(server);
         }
-        
-        for (Server server : servers) { // dalje se formira podskup suseda za sve servere, tako da nikad ne premasi vrednost [ln(n), 2ln(n), 3ln(n)]
-            int peerSubsetSize = maximumPeerSubsetSize - server.getPeerSubset().size();
+
+        for (int k = 0; k < servers.size(); k++) { // dalje se formira podskup suseda za sve servere, tako da nikad ne premasi vrednost [ln(n), 2ln(n), 3ln(n)]
+            Server server = servers.get(k);
+            int peerSubsetSize = ThreadLocalRandom.current().nextInt(1, 2 * averagePeerSubsetSize + 1) - server.getPeerSubset().size();
 
             if (peerSubsetSize <= 0) {
                 continue;
@@ -98,7 +97,7 @@ public class Simulator {
                 int peerIndex = ThreadLocalRandom.current().nextInt(0, servers.size());
                 Server peer = servers.get(peerIndex);
 
-                if (server.equals(peer) || server.peerSubsetContains(peer) || peer.getPeerSubset().size() == maximumPeerSubsetSize) {
+                if (server.equals(peer) || server.peerSubsetContains(peer) || peer.getPeerSubset().size() == averagePeerSubsetSize) {
                     i--;
                     continue;
                 }
