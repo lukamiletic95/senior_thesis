@@ -20,7 +20,7 @@ public final class Constants {
 
 
     public static final int SERVER_NUM[] = {100, 200, 300, 1000};
-    public static final int PEER_SUBSET_MULTIPLIER = 3; // {1, 2, 3} -> [ln(n), 2ln(n), 3ln(n)]
+    public static final int PEER_SUBSET_MULTIPLIER = 1; // {1, 2, 3} -> [ln(n), 2ln(n), 3ln(n)]
 
     public static final String SERVER = "S";
     public static final String LN = "ln(n)";

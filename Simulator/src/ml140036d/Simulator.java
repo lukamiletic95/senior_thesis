@@ -35,13 +35,13 @@ public class Simulator {
     // funkcija izvrsava jednu simulaciju
     private ArrayList<Server> simulate(int numberOfServers, int numberOfTransactions, SimulationStrategy simulationStrategy) {
         Semaphore toSignal = new Semaphore(-numberOfServers + 1, true);
-        int maximumPeerSubsetSize = Constants.PEER_SUBSET_MULTIPLIER * ((int) Math.log(numberOfServers));
+        int averagePeerSubsetSize = Constants.PEER_SUBSET_MULTIPLIER * ((int) Math.log(numberOfServers));
 
-        if (maximumPeerSubsetSize <= 0) {
-            maximumPeerSubsetSize = 1;
+        if (averagePeerSubsetSize <= 0) {
+            averagePeerSubsetSize = 1;
         }
-        
-        ArrayList<Server> servers = initServers(numberOfServers, simulationStrategy, toSignal, maximumPeerSubsetSize);
+
+        ArrayList<Server> servers = initServers(numberOfServers, simulationStrategy, toSignal, averagePeerSubsetSize);
 
         sendTransactions(servers, numberOfTransactions);
 
@@ -97,7 +97,7 @@ public class Simulator {
                 int peerIndex = ThreadLocalRandom.current().nextInt(0, servers.size());
                 Server peer = servers.get(peerIndex);
 
-                if (server.equals(peer) || server.peerSubsetContains(peer) || peer.getPeerSubset().size() == averagePeerSubsetSize) {
+                if (server.equals(peer) || server.peerSubsetContains(peer) || peer.getPeerSubset().size() == 2 * averagePeerSubsetSize) {
                     i--;
                     continue;
                 }
